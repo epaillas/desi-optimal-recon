@@ -38,16 +38,16 @@ for convention in ['RecSym', 'RecIso']:
     mask_y = np.abs(disp_y) < 100
     mask_z = np.abs(disp_z) < 100
 
-    ax[0].hist(disp_x[mask_x], bins=100, density=True, histtype='step', ls=':', color=colors[1], lw=2.0)
-    ax[1].hist(disp_y[mask_y], bins=100, density=True, histtype='step', ls=':', color=colors[1], lw=2.0)
-    ax[2].hist(disp_z[mask_z], bins=100, density=True, histtype='step', ls=':', color=colors[1], lw=2.0)
+    ax[0].hist(disp_x[mask_x], bins=100, density=True, histtype='step', ls=':', color=colors[2], lw=2.0)
+    ax[1].hist(disp_y[mask_y], bins=100, density=True, histtype='step', ls=':', color=colors[2], lw=2.0)
+    ax[2].hist(disp_z[mask_z], bins=100, density=True, histtype='step', ls=':', color=colors[2], lw=2.0)
 
     ax[0].set_xlabel(r'$x_{\rm post} - x_{\rm pre}$', fontsize=15)
     ax[1].set_xlabel(r'$y_{\rm post} - y_{\rm pre}$', fontsize=15)
     ax[2].set_xlabel(r'$z_{\rm post} - z_{\rm pre}$', fontsize=15)
 
-    ax[2].plot(np.nan, np.nan, ls='-', label='galaxies')
-    ax[2].plot(np.nan, np.nan, ls=':', label='randoms')
+    ax[2].plot(np.nan, np.nan, ls='-', label='galaxies', color=colors[0])
+    ax[2].plot(np.nan, np.nan, ls=':', label='randoms', color=colors[2])
 
     for aa in ax:
         aa.tick_params(axis='x', labelsize=15)
