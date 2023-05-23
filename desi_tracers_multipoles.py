@@ -92,7 +92,4 @@ for aa in ax:
 titles = ['BGS', 'LRG', 'ELG', 'QSO']
 for i, aa in enumerate(ax):
     aa.set_title(titles[i], fontsize=15)
-# ax[0].set_xlim(0, 0.3)
-# plt.savefig('fig/ezmocks_multipoles.png', dpi=300)
-# plt.show()
 plt.savefig('fig/png/desi_tracers_multipoles.png', dpi=500)

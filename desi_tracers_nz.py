@@ -47,7 +47,6 @@ for i, sample in enumerate(samples):
         nsub = 10_000
         ax[i].scatter(z[::nsub], 1e4 * nz[::nsub], s=5.0, marker='.')
 for aa in ax:
-    # aa.set_xlabel('redshift ''$z$', fontsize=15)
     aa.tick_params(axis='x', labelsize=15)
     aa.tick_params(axis='y', labelsize=15)
 ax[0].set_ylabel(r'$n(z)\, [10^4 h^{3}{\rm Mpc^{-3}}]$', fontsize=15)
@@ -55,9 +54,5 @@ ax[0].annotate(text='LRG', xy=(0.5, 15), fontsize=15)
 ax[1].annotate(text='ELG', xy=(0.9, 2.5), fontsize=15)
 ax[2].annotate(text='QSO', xy=(2.0, 5), fontsize=15)
 ax[3].annotate(text='BGS', xy=(0.4, 15), fontsize=15)
-# fig.text(0.5, 0.04, 'redshift ''$z$', ha='center')
 fig.supxlabel('redshift ''$z$', fontsize=15)
-# plt.tight_layout()
-plt.subplots_adjust(wspace=0.05)
 plt.savefig('fig/png/desi_tracers_nz.png', dpi=500)
-# plt.show()
