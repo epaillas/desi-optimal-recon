@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from optimalrecon.io_tools import catalog_fn, get_z_cutsky, get_z_cubicbox
 from optimalrecon.io_tools import read_positions_weights_cutsky
+from optimalrecon.recon_tools import get_f_reconstruction
 from pyrecon import mpi, utils, setup_logging
 from pyrecon import MultiGridReconstruction, IterativeFFTReconstruction, IterativeFFTParticleReconstruction
 from cosmoprimo.fiducial import DESI
@@ -14,10 +15,10 @@ import matplotlib.pyplot as plt
 logger = logging.getLogger('recon')
 
 def run_reconstruction(Reconstruction, distance, data_fn, randoms_fn,
-    data_rec_fn, randoms_rec_fn, f=0.8, bias=1.2, boxsize=None, nmesh=None,
+    data_rec_fn, randoms_rec_fn, f, bias, boxsize=None, nmesh=None,
     cellsize=4, smoothing_radius=15, nthreads=64, convention='reciso',
     dtype='f8', mpicomm=None, **kwargs):
-
+    
     root = mpicomm is None or mpicomm.rank == 0
 
     if np.ndim(randoms_fn) == 0: randoms_fn = [randoms_fn]
@@ -88,16 +89,18 @@ def run_reconstruction(Reconstruction, distance, data_fn, randoms_fn,
                 catalog.write(rec_fn, format='fits', overwrite=True)
         
         
-def get_f_bias(tracer='ELG'):
+def get_bias(tracer='ELG'):
+    """Get the default tracer bias for a given target sample."""
     if tracer.startswith('ELG'):
-        return 0.9, 1.2
+        return 1.2
     if tracer.startswith('QSO'):
-        return 0.928, 2.07
+        return 2.07
     if tracer.startswith('LRG'):
-        return 0.834, 1.99
+        return 1.99
     if tracer.startswith('BGS'):
-        return 0.682, 1.5
-    return 0.9, 1.2
+        return 1.5
+    return 1.2
+
 
 
 if __name__ == '__main__':
@@ -142,12 +145,14 @@ if __name__ == '__main__':
     if root: logger.info('Input directory is {}.'.format(cat_dir))
     if root: logger.info('Output directory is {}.'.format(out_dir))
 
-    f, bias = get_f_bias(args.tracer)
-    if args.f is not None: f = args.f
-    if args.bias is not None: bias = args.bias
+    if args.bias is not None:
+        bias = args.bias
+    else:
+        bias = get_bias(args.tracer)
 
     regions = args.region
 
+    zbox = get_z_cubicbox(args.tracer)
     if args.zlim is not None:
         zlims = [float(zlim) for zlim in args.zlim]
     else:
@@ -157,6 +162,10 @@ if __name__ == '__main__':
     distance = DESI().comoving_radial_distance 
 
     for zmin, zmax in zlims:
+        if args.f is not None:
+            f = args.f
+        else:
+            f = get_f_reconstruction(zbox=zbox, zlim=(zmin, zmax), mock_type='cutsky')
         for region in regions:
             if root:
                 logger.info(f'Running reconstruction in region {region} in redshift range {(zmin, zmax)} with f, bias = {(f, bias)}')
