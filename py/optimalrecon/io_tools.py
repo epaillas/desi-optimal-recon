@@ -1,33 +1,11 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-"""
-Note
-----
-The script can be called with multiple processes as (e.g. on 2 nodes, 64 threads for each):
-```
-srun -n 2 python xirunpc.py --nthreads 64 ...
-```
-Privilege nthreads over MPI processes.
-"""
-
 import os
-import argparse
 import logging
-
 import numpy as np
-
 from astropy.table import Table, vstack
-from matplotlib import pyplot as plt
-
-from pycorr import TwoPointCorrelationFunction, TwoPointEstimator, KMeansSubsampler, utils, setup_logging
-
 from LSS.tabulated_cosmo import TabulatedDESI
-#import LSS.main.cattools as ct
 
 
-
-logger = logging.getLogger('cosmodesi_io')
+logger = logging.getLogger('io_tools')
 
 
 def get_z_cutsky(tracer):
@@ -50,63 +28,78 @@ def get_z_cubicbox(tracer):
     elif tracer.startswith('BGS'):
         return 0.2
 
-
-def catalog_dir(tracer, mock_type='CutSky', base_dir='/global/cfs/cdirs/desi/cosmosim/FirstGenMocks/AbacusSummit/',
-    phase=0, cosmo=0):
+def catalog_dir(tracer, mock_type='cutsky', phase_idx=0, cosmo_idx=0, 
+    base_dir='/global/cfs/cdirs/desi/cosmosim/FirstGenMocks/AbacusSummit/'):
     redshift = get_z_cubicbox(tracer)
-    if mock_type == 'CubicBox':
-        return os.path.join(base_dir, mock_type, tracer, f'z{redshift:.3f}', f'AbacusSummit_base_c{cosmo:03}_p{phase:03}')
-    return os.path.join(base_dir, mock_type, tracer, f'z{redshift:.3f}')
+    if mock_type == 'cubicbox':
+        return os.path.join(base_dir, 'CubicBox', tracer, f'z{redshift:.3f}',
+                            f'AbacusSummit_base_c{cosmo_idx:03}_p{phase_idx:03}')
+    return os.path.join(base_dir, 'CutSky', tracer, f'z{redshift:.3f}')
 
 
-def catalog_fn(tracer='ELG', mock_type='CutSky', cat_dir=None, phase=0, name='data', nrandoms=20, **kwargs):
+def catalog_fn(tracer='LRG', mock_type='cutsky', cat_dir=None, phase=0, name='data', nrandoms=20, **kwargs):
     if cat_dir is None:
         cat_dir = catalog_dir(tracer=tracer, mock_type=mock_type, **kwargs)
     redshift = get_z_cubicbox(tracer)
 
-    if mock_type == 'CutSky':
+    if mock_type == 'cutsky':
         if name == 'data':
             return os.path.join(cat_dir, f'cutsky_{tracer}_z{redshift:.3f}_AbacusSummit_base_c000_ph{phase:03}.fits')
         return [os.path.join(cat_dir, f'cutsky_{tracer}_random_S{i*100}_1X.fits') for i in range(nrandoms)]
     else:
-        raise NotImplementedError('Only CutSky mocks are supported.')
+        raise NotImplementedError(f'catalog_fn not implemented for mock_type={mock_type}')
 
-# def read_positions_weights_cubicbox(filename, boxsize, hubble, az, los='z'):
-#     data = Table.read(filename)
-#     vx = data['vx']
-#     vy = data['vy']
-#     vz = data['vz']
-#     x = data['x']
-#     y = data['y']
-#     z = data['z']
-#     x_rsd = x + vx / (hubble * az)
-#     y_rsd = y + vy / (hubble * az)
-#     z_rsd = z + vz / (hubble * az)
-#     x_rsd = x_rsd % boxsize
-#     y_rsd = y_rsd % boxsize
-#     z_rsd = z_rsd % boxsize
-#     weights = np.ones_like(x)
-#     if los == 'x':
-#         return x_rsd, y, z, weights
-#     elif los == 'y':
-#         return x, y_rsd, z, weights
-#     elif los == 'z':
-#         return x, y, z_rsd, weights
+def read_positions_weights_cubicbox(filename, boxsize, hubble, az, los='z'):
+    data = Table.read(filename)
+    vx = data['vx']
+    vy = data['vy']
+    vz = data['vz']
+    x = data['x']
+    y = data['y']
+    z = data['z']
+    x_rsd = x + vx / (hubble * az)
+    y_rsd = y + vy / (hubble * az)
+    z_rsd = z + vz / (hubble * az)
+    x_rsd = x_rsd % boxsize
+    y_rsd = y_rsd % boxsize
+    z_rsd = z_rsd % boxsize
+    weights = np.ones_like(x)
+    if los == 'x':
+        return x_rsd, y, z, weights
+    elif los == 'y':
+        return x, y_rsd, z, weights
+    elif los == 'z':
+        return x, y, z_rsd, weights
 
-# def read_positions_weights_cutsky(filename, region='NGC', zmin=0, zmax=1):
-#     data = Table.read(filename)
-#     Y5_mask = data['STATUS'] & 2**1 != 0
-#     redshift_mask = (data['Z'] > zmin) & (data['Z'] < zmax)
-#     if region == 'NGC':
-#         cap_mask = (data['RA'] > 80) & (data['RA'] < 300)
-#     else:
-#         cap_mask = (data['RA'] < 80) | (data['RA'] > 300)
-#     mask = Y5_mask & cap_mask & redshift_mask
-#     ra = data['RA'][mask]
-#     dec = data['DEC'][mask]
-#     z = data['Z'][mask]
-#     nz = data['NZ'][mask]
-#     return ra, dec, z, nz
+def read_positions_weights_cutsky(filename, zlim=None, region='NGC'):
+    if isinstance(filename, (tuple, list)):
+        data = vstack([Table.read(fn) for fn in filename])
+    else:
+        data = Table.read(filename)
+
+    mask_bits = get_desi_mask()
+    mask_idx = np.arange(len(data['STATUS']))
+    desi_mask = mask_idx[((data['STATUS'] & (mask_bits)) == mask_bits)]
+
+    if zlim is None:
+        zlim = get_z_cutsky()
+    redshift_mask = (data['Z'] > zlim[0]) & (data['Z'] < zlim[1])
+
+    if region == 'NGC':
+        region_mask = (data['RA'] > 80) & (data['RA'] < 300)
+    else:
+        region_mask = (data['RA'] < 80) | (data['RA'] > 300)
+
+    mask = desi_mask & redshift_mask & region_mask
+
+    ra = data[mask]['RA']
+    dec = data[mask]['DEC']
+    z = data[mask]['Z']
+    weights = np.ones_like(ra)
+    return ra, dec, z, weights
+
+def get_desi_mask(main=0, nz=0, Y5=0, sv3=0):
+    return main * (2**3) + sv3 * (2**2) + Y5 * (2**1) + nz * (2**0)
 
 
 # def _format_bitweights(bitweights):

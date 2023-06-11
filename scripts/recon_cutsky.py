@@ -3,7 +3,7 @@ from astropy.table import Table
 import os
 import logging
 from pathlib import Path
-from optimalrecon.io_tools import catalog_fn, get_z_cutsky
+from optimalrecon.io_tools import catalog_fn, get_z_cutsky, get_z_cubicbox
 from pyrecon import mpi, utils, setup_logging
 from pyrecon import MultiGridReconstruction, IterativeFFTReconstruction, IterativeFFTParticleReconstruction
 from cosmoprimo.fiducial import DESI
@@ -11,18 +11,17 @@ import argparse
 
 logger = logging.getLogger('recon')
 
-# def run_reconstruction(Reconstruction, distance, data_fn,
-#     randoms_fn, data_rec_fn, randoms_rec_fn, f=0.8, bias=1.2,
-#     boxsize=None, nmesh=None, cellsize=4, smoothing_radius=15,
-#     nthreads=64, convention='reciso', dtype='f8', mpicomm=None, **kwargs):
+def run_reconstruction(Reconstruction, distance, data_fn,
+    randoms_fn, data_rec_fn, randoms_rec_fn, f=0.8, bias=1.2,
+    boxsize=None, nmesh=None, cellsize=4, smoothing_radius=15,
+    nthreads=64, convention='reciso', dtype='f8', mpicomm=None, **kwargs):
 
-#     root = mpicomm is None or mpicomm.rank == 0
+    root = mpicomm is None or mpicomm.rank == 0
 
-#     if np.ndim(randoms_fn) == 0: randoms_fn = [randoms_fn]
-#     if np.ndim(randoms_rec_fn) == 0: randoms_rec_fn = [randoms_rec_fn]
+    if np.ndim(randoms_fn) == 0: randoms_fn = [randoms_fn]
     
-#     data_positions, data_weights = None, None
-#     randoms_positions, randoms_weights = None, None
+    data_positions, data_weights = None, None
+    randoms_positions, randoms_weights = None, None
 
 #     if root:
 #         logger.info('Loading {}.'.format(data_fn))
@@ -140,29 +139,26 @@ if __name__ == '__main__':
     if root: logger.info('Input directory is {}.'.format(cat_dir))
     if root: logger.info('Output directory is {}.'.format(out_dir))
 
-    distance = DESI().comoving_radial_distance
-
     f, bias = get_f_bias(args.tracer)
     if args.f is not None: f = args.f
     if args.bias is not None: bias = args.bias
 
     regions = args.region
+
     if args.zlim is not None:
         zlims = [float(zlim) for zlim in args.zlim]
     else:
         zlims = get_z_cutsky(args.tracer)
     zlims = [(zlims[0], zlims[-1])]
 
+    zbox = get_z_cubicbox(args.tracer)
+
+    distance = DESI().comoving_radial_distance 
+
     for zmin, zmax in zlims:
         for region in regions:
-            if root: logger.info('Running reconstruction in region {} in redshift range {} with f, bias = {}.'.format(region, (zmin, zmax), (f, bias)))
-            data_fn = catalog_fn(tracer=args.tracer, mock_type='CutSky')
-            randoms_fn = catalog_fn(tracer=args.tracer, mock_type='CutSky', name='randoms', nrandoms=args.nran)
-            print(data_fn)
-            print(randoms_fn)
-            # randoms_fn = catalog_fn(**catalog_kwargs, cat_dir=cat_dir, name='randoms')
-            # data_rec_fn = catalog_fn(**catalog_kwargs, cat_dir=out_dir, rec_type=args.algorithm+args.convention, name='data')
-            # randoms_rec_fn = catalog_fn(**catalog_kwargs, cat_dir=out_dir, rec_type=args.algorithm+args.convention, name='randoms')
-            # if args.prepare_blinding:
-            #     data_rec_fn = catalog_fn(**catalog_kwargs, cat_dir=out_dir, rec_type=args.algorithm+'rsd', name='data')
-            # run_reconstruction(Reconstruction, distance, data_fn, randoms_fn, data_rec_fn, randoms_rec_fn, f=f, bias=bias, boxsize=args.boxsize, nmesh=args.nmesh, cellsize=args.cellsize, smoothing_radius=args.smoothing_radius, nthreads=args.nthreads, convention='rsd' if args.prepare_blinding else args.convention, dtype='f8', zlim=(zmin, zmax), weight_type=args.weight_type, mpicomm=mpicomm)
+            if root:
+                logger.info(f'Running reconstruction in region {region} in redshift range {(zmin, zmax)} with f, bias = {(f, bias)}')
+            data_fn = catalog_fn(tracer=args.tracer, mock_type='cutsky')
+            randoms_fn = catalog_fn(tracer=args.tracer, mock_type='cutsky', name='randoms', nrandoms=args.nran)
+            run_reconstruction(Reconstruction, distance, data_fn, randoms_fn, data_rec_fn, randoms_rec_fn, f=f, bias=bias, boxsize=args.boxsize, nmesh=args.nmesh, cellsize=args.cellsize, smoothing_radius=args.smoothing_radius, nthreads=args.nthreads, convention='rsd' if args.prepare_blinding else args.convention, dtype='f8', zlim=(zmin, zmax), weight_type=args.weight_type, mpicomm=mpicomm)
