@@ -5,12 +5,10 @@ import logging
 from pathlib import Path
 from optimalrecon.io_tools import catalog_fn, get_z_cutsky, get_z_cubicbox
 from optimalrecon.io_tools import read_positions_weights_cutsky
-from optimalrecon.recon_tools import get_f_reconstruction
 from pyrecon import utils
 from pypower import mpi, setup_logging, CatalogFFTPower
 from cosmoprimo.fiducial import DESI
 import argparse
-import matplotlib.pyplot as plt
 
 logger = logging.getLogger('pk_cutsky')
 

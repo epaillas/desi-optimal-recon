@@ -2,8 +2,6 @@ import os
 import logging
 import numpy as np
 from astropy.table import Table, vstack
-from LSS.tabulated_cosmo import TabulatedDESI
-import matplotlib.pyplot as plt
 
 
 logger = logging.getLogger('io_tools')
