@@ -58,6 +58,7 @@ def catalog_fn(tracer='LRG', mock_type='cutsky', cat_dir=None, phase=0,
     else:
         raise NotImplementedError(f'catalog_fn not implemented for mock_type={mock_type}')
 
+
 def read_positions_weights_cubicbox(filename, boxsize, hubble, az, los='z'):
     data = Table.read(filename)
     vx = data['vx']
