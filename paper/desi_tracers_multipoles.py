@@ -38,6 +38,23 @@ multipoles_phases = np.asarray(multipoles_phases)
 multipoles_lrg = multipoles_phases.mean(axis=0)
 err_lrg = multipoles_phases.std(axis=0)
 
+# ELG
+multipoles_phases = []
+for phase in range(25):
+    data_dir = Path('/global/cfs/cdirs/desi/cosmosim/KP45/MC/Clustering/AbacusSummit/CutSky/ELG/Xinyi/cellsize4/ELG_metrics/Pk/pknmesh1024/NGC')
+    data_fn = data_dir / f'cutsky_ELG_NGC_1.1z1.6_ph{phase:03}.randoms20X.pre_recon_redshiftspace_pad1.5_Pk_nmesh1024.npy'
+    result = CatalogFFTPower.load(data_fn)
+    poles = result.poles
+    poles.select((0, 0.3))
+    k_elg = poles.k
+    Pk_0 = poles(ell=0, complex=False)
+    Pk_2 = poles(ell=2, complex=False)
+    Pk_4 = poles(ell=4, complex=False)
+    multipoles_phases.append([Pk_0, Pk_2, Pk_4])
+multipoles_phases = np.asarray(multipoles_phases)
+multipoles_elg = multipoles_phases.mean(axis=0)
+err_elg = multipoles_phases.std(axis=0)
+
 # QSO
 multipoles_phases = []
 for phase in range(25):
@@ -71,6 +88,13 @@ ax[1].plot(k_lrg, k_lrg*multipoles_lrg[2], label='$\ell = 4$')
 ax[1].fill_between(k_lrg, k_lrg*(multipoles_lrg[0] - err_lrg[0]), k_lrg*(multipoles_lrg[0] + err_lrg[0]), alpha=0.3)
 ax[1].fill_between(k_lrg, k_lrg*(multipoles_lrg[1] - err_lrg[1]), k_lrg*(multipoles_lrg[1] + err_lrg[1]), alpha=0.3)
 ax[1].fill_between(k_lrg, k_lrg*(multipoles_lrg[2] - err_lrg[2]), k_lrg*(multipoles_lrg[2] + err_lrg[2]), alpha=0.3)
+
+ax[2].plot(k_elg, k_elg*multipoles_elg[0], label='$\ell = 0$')
+ax[2].plot(k_elg, k_elg*multipoles_elg[1], label='$\ell = 2$')
+ax[2].plot(k_elg, k_elg*multipoles_elg[2], label='$\ell = 4$')
+ax[2].fill_between(k_elg, k_elg*(multipoles_elg[0] - err_elg[0]), k_elg*(multipoles_elg[0] + err_elg[0]), alpha=0.3)
+ax[2].fill_between(k_elg, k_elg*(multipoles_elg[1] - err_elg[1]), k_elg*(multipoles_elg[1] + err_elg[1]), alpha=0.3)
+ax[2].fill_between(k_elg, k_elg*(multipoles_elg[2] - err_elg[2]), k_elg*(multipoles_elg[2] + err_elg[2]), alpha=0.3)
 
 ax[3].plot(k_qso, k_qso*multipoles_qso[0], label='$\ell = 0$')
 ax[3].plot(k_qso, k_qso*multipoles_qso[1], label='$\ell = 2$')
