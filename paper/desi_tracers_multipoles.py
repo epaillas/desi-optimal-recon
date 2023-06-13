@@ -92,9 +92,9 @@ ax[1].fill_between(k_lrg, k_lrg*(multipoles_lrg[2] - err_lrg[2]), k_lrg*(multipo
 ax[2].plot(k_elg, k_elg*multipoles_elg[0], label='$\ell = 0$')
 ax[2].plot(k_elg, k_elg*multipoles_elg[1], label='$\ell = 2$')
 ax[2].plot(k_elg, k_elg*multipoles_elg[2], label='$\ell = 4$')
-ax[2].fill_between(k_elg, k_elg*(multipoles_elg[0] - err_elg[0]), k_lrg*(multipoles_elg[0] + err_elg[0]), alpha=0.3)
-ax[2].fill_between(k_elg, k_elg*(multipoles_elg[1] - err_elg[1]), k_lrg*(multipoles_elg[1] + err_elg[1]), alpha=0.3)
-ax[2].fill_between(k_elg, k_elg*(multipoles_elg[2] - err_elg[2]), k_lrg*(multipoles_elg[2] + err_elg[2]), alpha=0.3)
+ax[2].fill_between(k_elg, k_elg*(multipoles_elg[0] - err_elg[0]), k_elg*(multipoles_elg[0] + err_elg[0]), alpha=0.3)
+ax[2].fill_between(k_elg, k_elg*(multipoles_elg[1] - err_elg[1]), k_elg*(multipoles_elg[1] + err_elg[1]), alpha=0.3)
+ax[2].fill_between(k_elg, k_elg*(multipoles_elg[2] - err_elg[2]), k_elg*(multipoles_elg[2] + err_elg[2]), alpha=0.3)
 
 ax[3].plot(k_qso, k_qso*multipoles_qso[0], label='$\ell = 0$')
 ax[3].plot(k_qso, k_qso*multipoles_qso[1], label='$\ell = 2$')
