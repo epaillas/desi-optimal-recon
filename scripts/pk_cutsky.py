@@ -177,14 +177,14 @@ if __name__ == '__main__':
                 logger.info(f'Running Pk in region {region} in redshift range {(zmin, zmax)} on {mpicomm.size} cores.')
             data_fn = catalog_fn(tracer=args.tracer, mock_type='cutsky')
             randoms_fn = catalog_fn(tracer=args.tracer, mock_type='cutsky', name='randoms', nrandoms=args.nran)
-            data_rec_fn, randoms_rec_fn = None, None
+            data_rec_fn, randoms_rec_fn, pk_rec_fn = None, None, None
             if args.algorithm is not None: 
                 data_rec_fn = catalog_fn(tracer=args.tracer, cat_dir=args.recon_dir, rec_type=args.algorithm+args.convention,
                                         name='data', region=region, nrandoms=args.nran, mock_type='cutsky')
                 randoms_rec_fn = catalog_fn(tracer=args.tracer, cat_dir=args.recon_dir, rec_type=args.algorithm+args.convention,
                                             name='randoms', region=region, nrandoms=args.nran, mock_type='cutsky')
+                pk_rec_fn = os.path.join(args.outdir, f'Pk_cutsky_{args.tracer}_{region}_{args.algorithm+args.convention}.npy')
             pk_fn = os.path.join(args.outdir, f'Pk_cutsky_{args.tracer}_{region}.npy')
-            pk_rec_fn = os.path.join(args.outdir, f'Pk_cutsky_{args.tracer}_{region}_{args.algorithm+args.convention}.npy')
             run_pk(distance, data_fn, randoms_fn, data_rec_fn=data_rec_fn, randoms_rec_fn=randoms_rec_fn,
                    pk_fn=pk_fn, pk_rec_fn=pk_rec_fn, boxsize=args.boxsize, nmesh=args.nmesh,
                    cellsize=args.cellsize, dtype='f8', mpicomm=mpicomm, zlim=(zmin, zmax),

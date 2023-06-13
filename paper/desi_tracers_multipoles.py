@@ -2,7 +2,7 @@ import numpy as np
 from pathlib import Path
 from pypower import CatalogFFTPower
 import matplotlib.pyplot as plt
-plt.style.use(['enrique-science'])
+plt.style.use(['optimalrecon.mplstyle'])
 
 # BGS
 multipoles_phases = []
