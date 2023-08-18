@@ -1,16 +1,11 @@
 import numpy as np
 from pathlib import Path
-from cosmoprimo.fiducial import DESI
-from pypower import PowerSpectrumStatistics
 from desilike.theories.galaxy_clustering import (BAOPowerSpectrumTemplate,
                                                  DampedBAOWigglesTracerCorrelationFunctionMultipoles,)
 from desilike.observables.galaxy_clustering import TracerCorrelationFunctionMultipolesObservable
 from desilike.likelihoods import ObservablesGaussianLikelihood
 from desilike import setup_logging
-from desilike.profilers import MinuitProfiler
-from desilike.samples import plotting
 from desilike.samplers import EmceeSampler
-import matplotlib.pyplot as plt
 import argparse
 from pathlib import Path
 
