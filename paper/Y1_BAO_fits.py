@@ -4,15 +4,14 @@ from getdist import plots as gdplt
 from desilike.samples import plotting
 import matplotlib.pyplot as plt
 
-regions = ['NGC', 'GCcomb']
+# regions = ['NGC', 'GCcomb']
 
 chains = []
-for region in regions:
-    data_dir = '/pscratch/sd/e/epaillas/desi/recon_iron/chains/'
-    data_fn = data_dir + f'LRG_{region}_0.4_0.6_v0.1.npy'
-    chain = Chain.load(data_fn)
-    chain = chain.remove_burnin(0.1)[::10]
-    chains.append(chain)
+data_dir = '/pscratch/sd/e/epaillas/desi/recon_iron/chains/'
+data_fn = data_dir + f'ELG_LOPnotqso_GCcomb_0.8_1.1_v0.4_free_damping.npy'
+chain = Chain.load(data_fn)
+chain = chain.remove_burnin(0.1)[::10]
+chains.append(chain)
 
 g = gdplt.get_subplot_plotter(width_inch=6)
 g.settings.axis_marker_lw = 1.0
@@ -30,7 +29,6 @@ plotting.plot_triangle(
     g=g,
     params=['qpar', 'qper'],
     markers={'qpar': 1., 'qper': 1},
-    labels=regions
 )
 plt.show()
 
