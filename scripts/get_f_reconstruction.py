@@ -21,6 +21,7 @@ parser.add_argument('--tracer', help='tracer to be selected', type=str, default=
 parser.add_argument('--zlim', help='z-limits, or options for z-limits, e.g. "highz", "lowz"', type=str, nargs='*', default=None)
 parser.add_argument('--region', help='regions; by default, run on all regions', type=str, nargs='*', choices=['NGC','SGC','N', 'S', 'DN', 'DS', ''], default=['NGC'])
 parser.add_argument('--weight_type', help='types of weights to use; "default" just uses WEIGHT column', type=str, default='default_FKP')
+parser.add_argument('--version', help='version of the LSS catalog', type=str, default='v0.6.1')
 
 args = parser.parse_args()
 
@@ -38,10 +39,10 @@ else:
 
 cosmo = DESI()
 
-data_dir = Path('/global/cfs/cdirs/desi/survey/catalogs/Y1/LSS/iron/LSScats/v0.6.1/blinded')
+data_dir = f'/global/cfs/cdirs/desi/survey/catalogs/Y1/LSS/iron/LSScats/{args.version}/blinded'
 
 for region in args.region:
-    data_fn  = data_dir / f'{args.tracer}_{region}_clustering.dat.fits'
+    data_fn  = Path(data_dir) / f'{args.tracer}_{region}_clustering.dat.fits'
     redshift, weights = read_catalog(data_fn, zmin=zlims[0], zmax=zlims[1], weight_type=args.weight_type)
 
     effective_redshift = np.average(redshift, weights=weights)
