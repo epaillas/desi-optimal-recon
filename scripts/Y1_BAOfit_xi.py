@@ -11,7 +11,7 @@ from desilike.samplers import EmceeSampler
 import argparse
 from pathlib import Path
 import matplotlib.pyplot as plt
-plt.style.use(['enrique-science',])
+plt.style.use(['enrique-science.mplstyle',])
 
 
 IRON_DIR = Path('/global/cfs/cdirs/desi/survey/catalogs/Y1/LSS/iron/LSScats/')
@@ -43,9 +43,9 @@ def read_xi_cov(tracer="LRG", region="GCcomb", version="0.6", zmin=0.4, zmax=0.6
     if tracer.startswith('ELG_LOPnotqso'): smoothing_radius = 10
     if tracer.startswith('QSO'): smoothing_radius = 20
     if not recon_algorithm:
-        data_fn = data_dir / f'xi024_{tracer}_{region}_{zmin}_{zmax}_default_FKP_lin4_s20-200_cov_RascalC_Gaussian.txt'
+        data_fn = data_dir / f'xi024_{tracer}_{region}_{zmin}_{zmax}_default_FKP_lin4_s20-200_cov_RascalC_rescaled.txt'
     else:
-        data_fn = data_dir / f'xi024_{tracer}_{recon_algorithm}{recon_mode}_sm{smoothing_radius}_{region}_{zmin}_{zmax}_default_FKP_lin4_s20-200_cov_RascalC_Gaussian.txt'
+        data_fn = data_dir / f'xi024_{tracer}_{recon_algorithm}{recon_mode}_sm{smoothing_radius}_{region}_{zmin}_{zmax}_default_FKP_lin4_s20-200_cov_RascalC_rescaled.txt'
     cov = np.genfromtxt(data_fn)
     smid = np.arange(20, 200, 4)
     slim = {ell: (smin, smax) for ell in ells}
